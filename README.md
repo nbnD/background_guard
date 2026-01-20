@@ -1,15 +1,89 @@
-# background_guard
+BackgroundGuard
 
-A new Flutter plugin project.
+BackgroundGuard is a Flutter plugin that helps you detect, diagnose, and recover from background task failures on Android, especially on OEM devices like Samsung, Xiaomi, Oppo, where background execution is aggressively restricted.
 
-## Getting Started
+It helps you stop guessing why background tasks fail and instead guide users to fix system restrictions and verify the fix actually worked.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+🚨 The Problem
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+On many Android devices, background tasks fail due to:
 
+Battery optimization
+
+Power saving modes
+
+OEM background restrictions
+
+This results in:
+
+Broken sync or notifications
+
+User complaints
+
+Developers guessing instead of knowing
+
+Most background libraries only schedule tasks — they don’t explain failures or help users fix them.
+
+✅ What BackgroundGuard Does
+
+BackgroundGuard adds diagnostics + recovery + verification on top of background execution.
+
+It helps answer:
+
+“Why is my background task not running on this device, and how can the user fix it?”
+
+⚡ Quick Start
+await BackgroundGuard.init();
+
+Run a background heartbeat
+await BackgroundGuard.runHeartbeatNow();
+
+Read background health
+final health = await BackgroundGuard.debugReadHealth();
+
+Diagnose device restrictions
+final report = await BackgroundGuard.checkDevice();
+
+Open a fix action
+await BackgroundGuard.openFix(report.fixActions.first);
+
+🔁 Verify the Fix
+
+After the user changes system settings, run:
+
+await BackgroundGuard.runHeartbeatNow();
+
+
+If lastSuccess updates, background execution is working again.
+
+📱 Samsung Devices (Important)
+
+On modern Samsung devices, settings may open to Power Saving or App Info.
+This is expected due to OS restrictions.
+
+Users typically need to:
+
+Add the app to Never sleeping apps
+
+Set battery usage to Unrestricted
+
+🚫 What This Plugin Does NOT Do
+
+Does not bypass Android restrictions
+
+Does not guarantee 100% background execution
+
+Does not highlight your app inside system Settings
+
+Instead, it follows:
+Detect → Guide → Verify
+
+🛠 Platform Support
+
+✅ Android
+
+❌ iOS (planned)
+
+📄 License
+
+MIT
