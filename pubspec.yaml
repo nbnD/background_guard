@@ -1,7 +1,9 @@
 name: background_guard
 description: Diagnose why background tasks fail on Android, guide users to fix system restrictions, and verify the fix worked.
 version: 0.0.1
-homepage:
+homepage: https://github.com/nbnd/background_guard
+repository: https://github.com/nbnd/background_guard
+issue_tracker: https://github.com/nbnd/background_guard/issues
 
 environment:
   sdk: ^3.10.7
