@@ -1,10 +1,32 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:background_guard/background_guard.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await BackgroundGuard.init();
+  await _initBackgroundGuard();
   runApp(const MyApp());
+}
+
+Future<void> _initBackgroundGuard() async {
+  if (Platform.isAndroid) {
+    // Android-only init (WorkManager etc.)
+    await BackgroundGuard.init();
+    return;
+  }
+
+  if (Platform.isIOS) {
+    // Start probe lazily from UI, or optionally start here if you want:
+    await IosProbe.start();
+    return;
+  }
+
+  // Other platforms (web/desktop) - do nothing by design.
+  if (kDebugMode) {
+    debugPrint('BackgroundGuard: init skipped (unsupported platform).');
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -15,9 +37,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // ---------------- ANDROID STATE  ----------------
+
   Map<String, Object?> _health = const {};
   DeviceReport? _report;
   String? _lastFixResult;
+
+  // ---------------- iOS STATE ----------------
+  String _iosLogs = '—';
+  String? _iosStatus;
+
+  // ---------------- ANDROID ACTIONS (UNCHANGED) ----------------
 
   Future<void> _runNow() async {
     await BackgroundGuard.runHeartbeatNow();
@@ -57,8 +87,104 @@ class _MyAppState extends State<MyApp> {
     return DateTime.fromMillisecondsSinceEpoch(millis).toLocal().toString();
   }
 
+  // ---------------- iOS ACTIONS ----------------
+
+  Future<void> _iosStartProbe() async {
+    final ok = await IosProbe.start();
+    setState(() {
+      _iosStatus = ok
+          ? 'Probe started. Export logs to view.'
+          : 'Probe start failed.';
+    });
+  }
+
+  Future<void> _iosScheduleRefresh() async {
+    final ok = await IosProbe.scheduleRefresh();
+    setState(() {
+      _iosStatus = ok
+          ? 'Schedule submitted (best-effort by iOS). Export logs.'
+          : 'Schedule failed (see exported logs).';
+    });
+  }
+
+  Future<void> _iosExportLogs() async {
+    final logs = await IosProbe.exportLogs();
+    setState(() {
+      _iosLogs = logs.isEmpty ? 'No logs yet.' : logs;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // ✅ If iOS -> show iOS UI
+    if (Platform.isIOS) {
+      return MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(title: const Text('BackgroundGuard Demo (iOS)')),
+          body: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const Text(
+                'iOS Probe (Barebones)',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'iOS does not support Android-style background fixing. '
+                'This probe focuses on observability and exporting logs.',
+              ),
+              const SizedBox(height: 16),
+
+              ElevatedButton(
+                onPressed: _iosStartProbe,
+                child: const Text('Start iOS Probe'),
+              ),
+              const SizedBox(height: 10),
+
+              ElevatedButton(
+                onPressed: _iosScheduleRefresh,
+                child: const Text('Schedule BG Refresh (best-effort)'),
+              ),
+              const SizedBox(height: 10),
+
+              OutlinedButton(
+                onPressed: _iosExportLogs,
+                child: const Text('Export Logs'),
+              ),
+
+              const SizedBox(height: 14),
+
+              if (_iosStatus != null)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(_iosStatus!),
+                ),
+
+              const SizedBox(height: 12),
+
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  _iosLogs,
+                  style: const TextStyle(fontFamily: 'monospace'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // ✅ Else Android -> keep EXACT same UI
+
     final lastAttempt = _health['lastAttempt'];
     final lastSuccess = _health['lastSuccess'];
     final lastError = _health['lastError'];

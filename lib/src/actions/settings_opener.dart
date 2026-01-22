@@ -23,9 +23,12 @@ class SettingsOpener {
                 'openBatteryOptimizationSettings',
               )) ??
               false;
-              
+
         case 'open_oem_background_settings':
-          return (await _channel.invokeMethod<bool>('openOemBackgroundSettings')) ?? false;
+          return (await _channel.invokeMethod<bool>(
+                'openOemBackgroundSettings',
+              )) ??
+              false;
 
         default:
           return false;

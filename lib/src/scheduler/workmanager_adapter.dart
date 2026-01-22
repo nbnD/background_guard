@@ -23,11 +23,13 @@ class WorkmanagerAdapter {
     await Workmanager().initialize(callbackDispatcher);
   }
 
-  static Future<void> scheduleHeartbeatPeriodic(int periodicTimeInMinutes) async {
+  static Future<void> scheduleHeartbeatPeriodic(
+    int periodicTimeInMinutes,
+  ) async {
     await Workmanager().registerPeriodicTask(
       'bg_heartbeat_periodic_unique',
       kHeartbeatTask,
-      frequency:  Duration(minutes: periodicTimeInMinutes),
+      frequency: Duration(minutes: periodicTimeInMinutes),
       existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
     );
   }

@@ -1,6 +1,6 @@
 name: background_guard
 description: Diagnose why background tasks fail on Android, guide users to fix system restrictions, and verify the fix worked.
-version: 1.0.2
+version: 1.0.3
 homepage: https://github.com/nbnd/background_guard
 repository: https://github.com/nbnd/background_guard
 issue_tracker: https://github.com/nbnd/background_guard/issues
@@ -42,6 +42,9 @@ flutter:
     platforms:
       android:
         package: com.flutterjunction.background_guard
+        pluginClass: BackgroundGuardPlugin
+        
+      ios:
         pluginClass: BackgroundGuardPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

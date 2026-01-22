@@ -29,4 +29,3 @@ class DeviceReport {
     required this.fixActions,
   });
 }
-
