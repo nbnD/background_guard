@@ -47,12 +47,14 @@ class DeviceChecker {
     final oem = detectOem(manufacturer);
     if (oem != Oem.google && oem != Oem.unknown) {
       issues.add('OEM background restrictions detected (${oem.name}).');
-      fixes.add(const FixAction(
-        title: 'Check OEM Background Settings',
-        description:
-            'Some phones require extra steps (Auto-start / Background activity).',
-        actionId: 'open_oem_background_settings',
-      ));
+      fixes.add(
+        const FixAction(
+          title: 'Check OEM Background Settings',
+          description:
+              'Some phones require extra steps (Auto-start / Background activity).',
+          actionId: 'open_oem_background_settings',
+        ),
+      );
     }
 
     final status = issues.isEmpty ? GuardStatus.ok : GuardStatus.warn;

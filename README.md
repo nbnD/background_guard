@@ -1,88 +1,158 @@
-BackgroundGuard
+# BackgroundGuard
 
-BackgroundGuard is a Flutter plugin that helps you detect, diagnose, and recover from background task failures on Android, especially on OEM devices like Samsung, Xiaomi, Oppo, where background execution is aggressively restricted.
+A Flutter plugin for **background task observability, diagnostics, and recovery** — built for real production issues on **Android** and honest observability on **iOS**.
 
-It helps you stop guessing why background tasks fail and instead guide users to fix system restrictions and verify the fix actually worked.
+BackgroundGuard helps answer one critical question:
 
-🚨 The Problem
+> **Did my background task actually run — or was it silently blocked by the OS?**
 
-On many Android devices, background tasks fail due to:
+---
 
-Battery optimization
+## 🚨 The Problem
 
-Power saving modes
+### Android
 
-OEM background restrictions
+On modern Android devices (Samsung, Xiaomi, Oppo, Vivo, etc.), background tasks often **silently fail** due to:
 
-This results in:
+- OEM battery optimizations
+- aggressive power-saving policies
+- background execution limits
+- vendor-specific task killers
 
-Broken sync or notifications
+Tasks appear scheduled, no errors are thrown, but execution never happens.
 
-User complaints
+---
 
-Developers guessing instead of knowing
+### iOS
 
-Most background libraries only schedule tasks — they don’t explain failures or help users fix them.
+iOS strictly controls background execution:
 
-✅ What BackgroundGuard Does
+- no guaranteed execution
+- no access to system background settings
+- no way to force background behavior
 
-BackgroundGuard adds diagnostics + recovery + verification on top of background execution.
+BackgroundGuard does **not** overpromise on iOS.
 
-It helps answer:
+---
 
-“Why is my background task not running on this device, and how can the user fix it?”
+## ✅ What BackgroundGuard Does
 
-⚡ Quick Start
-await BackgroundGuard.init();
+### Android (Production-ready)
 
-Run a background heartbeat
-await BackgroundGuard.runHeartbeatNow();
+BackgroundGuard provides a **detect → diagnose → guide → verify** workflow:
 
-Read background health
+- Detects whether background work actually executed
+- Tracks last attempt, last success, and last error
+- Diagnoses OEM and battery restriction risks
+- Guides users to relevant system settings
+- Verifies fixes using real execution data
+
+---
+
+### iOS (Observability-only)
+
+On iOS, BackgroundGuard provides a **barebones probe** focused on observability:
+
+- Logs app lifecycle events
+- Registers and attempts `BGTaskScheduler` tasks (best-effort)
+- Records when background callbacks fire
+- Exports logs for diagnostics and sharing
+
+> ⚠️ iOS background execution is OS-controlled and not guaranteed.
+
+---
+
+## ❌ What BackgroundGuard Does NOT Do
+
+- Does not guarantee background execution
+- Does not bypass OS restrictions
+- Does not use private or undocumented APIs
+- Does not risk App Store rejection
+- Does not hide platform limitations
+
+---
+
+## 📦 Installation
+
+```bash
+flutter pub add background_guard
+```
+
+# Usage 
+## Android
+
+### 1. Initialize BackgroundGuard:
+
+```bash
+ await BackgroundGuard.init();
+```
+Run or schedule background heartbeat:
+
+```dart
+ await BackgroundGuard.runHeartbeatNow();
+```
+
+```dart
+await BackgroundGuard.scheduleHeartbeat(
+  periodicTimeInMinutes: 15,
+);
+```
+
+### 2. Read background health:
+
+```bash
 final health = await BackgroundGuard.debugReadHealth();
+```
 
-Diagnose device restrictions
+### 3. Diagnose device restrictions:
+
+```dart
 final report = await BackgroundGuard.checkDevice();
+```
 
-Open a fix action
-await BackgroundGuard.openFix(report.fixActions.first);
+### 4. Open a suggested fix action:
+```dart
+await BackgroundGuard.openFix(
+  report.fixActions.first,
+);
+```
+## iOS (Probe)
 
-🔁 Verify the Fix
+### 1. Start the iOS observability probe:
+```dart
+await IosProbe.start();
+```
 
-After the user changes system settings, run:
+### 2. Attempt to schedule a background refresh (best-effort):
 
-await BackgroundGuard.runHeartbeatNow();
+```dart
+await IosProbe.scheduleRefresh();
+```
+
+### 3. Export collected logs:
+
+```dart
+final logs = await IosProbe.exportLogs();
+```
 
 
-If lastSuccess updates, background execution is working again.
+Scheduling may fail on simulator and is OS-controlled on real devices.
 
-📱 Samsung Devices (Important)
 
-On modern Samsung devices, settings may open to Power Saving or App Info.
-This is expected due to OS restrictions.
 
-Users typically need to:
+## Testing Notes
 
-Add the app to Never sleeping apps
+   - Android behavior varies heavily by OEM
 
-Set battery usage to Unrestricted
+   - iOS background tasks may not fire immediately (or at all)
 
-🚫 What This Plugin Does NOT Do
+   - Simulator behavior ≠ real device behavior (especially on iOS)
 
-Does not bypass Android restrictions
+   - Real-device logs are the most valuable datapoint.
 
-Does not guarantee 100% background execution
 
-Does not highlight your app inside system Settings
 
-Instead, it follows:
-Detect → Guide → Verify
-
-🛠 Platform Support
-
-✅ Android
-
-❌ iOS (planned)
+  
 
 📄 License
 

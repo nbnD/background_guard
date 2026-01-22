@@ -7,13 +7,13 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockBackgroundGuardPlatform
     with MockPlatformInterfaceMixin
     implements BackgroundGuardPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 }
 
 void main() {
-  final BackgroundGuardPlatform initialPlatform = BackgroundGuardPlatform.instance;
+  final BackgroundGuardPlatform initialPlatform =
+      BackgroundGuardPlatform.instance;
 
   test('$MethodChannelBackgroundGuard is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelBackgroundGuard>());
